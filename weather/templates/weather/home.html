@@ -1,0 +1,474 @@
+```html
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ website_name }}</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            color: white;
+            padding: 30px 15px;
+            transition: background 0.4s ease;
+        }
+
+        /* Weather backgrounds */
+
+        body.clear {
+            background: linear-gradient(135deg, #38bdf8, #2563eb);
+        }
+
+        body.cloudy {
+            background: linear-gradient(135deg, #64748b, #334155);
+        }
+
+        body.rainy {
+            background: linear-gradient(135deg, #334155, #0f172a);
+        }
+
+        body.snowy {
+            background: linear-gradient(135deg, #94a3b8, #475569);
+        }
+
+        body.foggy {
+            background: linear-gradient(135deg, #94a3b8, #64748b);
+        }
+
+        body.stormy {
+            background: linear-gradient(135deg, #312e81, #111827);
+        }
+
+        body.default-bg {
+            background: linear-gradient(135deg, #0f172a, #1e3a8a);
+        }
+
+        /* Night backgrounds */
+
+        body.clear.night {
+            background: linear-gradient(135deg, #172554, #312e81);
+        }
+
+        body.cloudy.night,
+        body.rainy.night,
+        body.snowy.night,
+        body.foggy.night,
+        body.stormy.night {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 34px;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #e2e8f0;
+            font-size: 15px;
+        }
+
+        /* Search form */
+
+        .search-box {
+            display: flex;
+            max-width: 550px;
+            margin: 25px auto;
+            gap: 10px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 14px 16px;
+            border: none;
+            outline: none;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .search-box button {
+            padding: 14px 22px;
+            border: none;
+            border-radius: 10px;
+            background: #0f172a;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .search-box button:hover {
+            background: #020617;
+        }
+
+        /* Common cards */
+
+        .card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 18px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Current weather */
+
+        .current-weather {
+            text-align: center;
+        }
+
+        .location {
+            font-size: 27px;
+            margin-bottom: 8px;
+        }
+
+        .current-time {
+            color: #e2e8f0;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .weather-icon {
+            font-size: 75px;
+            margin: 10px 0;
+        }
+
+        .temperature {
+            font-size: 65px;
+            font-weight: bold;
+        }
+
+        .condition {
+            font-size: 22px;
+            margin: 10px 0;
+        }
+
+        .day-status {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 7px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        /* Weather details */
+
+        .section-title {
+            font-size: 23px;
+            margin-bottom: 20px;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .detail-item {
+            background: rgba(255, 255, 255, 0.12);
+            padding: 18px 10px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .detail-item .symbol {
+            font-size: 27px;
+            margin-bottom: 8px;
+        }
+
+        .detail-item p {
+            color: #e2e8f0;
+            font-size: 14px;
+            margin-bottom: 7px;
+        }
+
+        .detail-item h3 {
+            font-size: 19px;
+        }
+
+        /* Hourly forecast */
+
+        .hourly-container {
+            display: flex;
+            gap: 14px;
+            overflow-x: auto;
+            padding-bottom: 12px;
+        }
+
+        .hourly-container::-webkit-scrollbar {
+            height: 7px;
+        }
+
+        .hourly-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+        }
+
+        .hourly-card {
+            min-width: 145px;
+            background: rgba(255, 255, 255, 0.13);
+            border-radius: 13px;
+            padding: 17px 12px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .hourly-card h3 {
+            font-size: 15px;
+            margin-bottom: 12px;
+        }
+
+        .hourly-card .hour-icon {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+
+        .hourly-card .hour-condition {
+            font-size: 13px;
+            min-height: 32px;
+            margin-bottom: 10px;
+        }
+
+        .hourly-card .hour-temp {
+            font-size: 17px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .hourly-card p {
+            font-size: 12px;
+            color: #e2e8f0;
+            margin-top: 6px;
+        }
+
+        /* Error and welcome */
+
+        .message {
+            text-align: center;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px auto;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .error {
+            background: rgba(220, 38, 38, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 35px;
+            color: #e2e8f0;
+            font-size: 13px;
+        }
+
+        /* Responsive design */
+
+        @media (max-width: 600px) {
+            body {
+                padding: 20px 12px;
+            }
+
+            header h1 {
+                font-size: 27px;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .search-box button {
+                width: 100%;
+            }
+
+            .temperature {
+                font-size: 52px;
+            }
+
+            .weather-icon {
+                font-size: 60px;
+            }
+
+            .details-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .card {
+                padding: 18px;
+            }
+
+            .section-title {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body class="{% if weather %}{{ weather.background_class }}{% if not weather.is_day %} night{% endif %}{% else %}default-bg{% endif %}">
+
+<div class="container">
+
+    <!-- Header -->
+
+    <header>
+        <h1>🌤️ {{ website_name }}</h1>
+        <p>Get real-time weather information for any city</p>
+    </header>
+
+    <!-- Search -->
+
+    <form method="GET" class="search-box">
+        <input
+            type="text"
+            name="city"
+            placeholder="Enter city name..."
+            value="{{ city }}"
+            required
+        >
+        <button type="submit">Search Weather</button>
+    </form>
+
+    <!-- Error message -->
+
+    {% if error %}
+        <div class="message error">
+            <h3>⚠️ {{ error }}</h3>
+        </div>
+    {% endif %}
+
+    <!-- Current weather -->
+
+    {% if weather %}
+
+        <section class="card current-weather">
+
+            <h2 class="location">
+                📍 {{ weather.city }}, {{ weather.country }}
+            </h2>
+
+            <p class="current-time">
+                Local time: {{ weather.time }}
+            </p>
+
+            <div class="weather-icon">
+                {{ weather.icon }}
+            </div>
+
+            <h1 class="temperature">
+                {{ weather.temperature|floatformat:1 }}°C
+            </h1>
+
+            <p class="condition">
+                {{ weather.condition }}
+            </p>
+
+            <span class="day-status">
+                {% if weather.is_day %}
+                    ☀️ Day
+                {% else %}
+                    🌙 Night
+                {% endif %}
+            </span>
+
+        </section>
+
+        <!-- Weather details -->
+
+        <section class="card">
+
+            <h2 class="section-title">🌡️ Current Weather Details</h2>
+
+            <div class="details-grid">
+
+                <div class="detail-item">
+                    <div class="symbol">🌡️</div>
+                    <p>Feels Like</p>
+                    <h3>{{ weather.feels_like|floatformat:1 }}°C</h3>
+                </div>
+
+                <div class="detail-item">
+                    <div class="symbol">💧</div>
+                    <p>Humidity</p>
+                    <h3>{{ weather.humidity }}%</h3>
+                </div>
+
+                <div class="detail-item">
+                    <div class="symbol">💨</div>
+                    <p>Wind Speed</p>
+                    <h3>{{ weather.wind_speed }} km/h</h3>
+                </div>
+
+                <div class="detail-item">
+                    <div class="symbol">🌧️</div>
+                    <p>Precipitation</p>
+                    <h3>{{ weather.precipitation }} mm</h3>
+                </div>
+
+                <div class="detail-item">
+                    <div class="symbol">☁️</div>
+                    <p>Weather Condition</p>
+                    <h3>{{ weather.condition }}</h3>
+                </div>
+
+                <div class="detail-item">
+                    <div class="symbol">📡</div>
+                    <p>Weather Code</p>
+                    <h3>{{ weather.weather_code }}</h3>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Hourly forecast -->
+
+       
+
+    {% else %}
+
+        {% if not error %}
+            <div class="message">
+                <h2>🌍 Welcome to My Weather Website</h2>
+                <p style="margin-top: 12px;">
+                    Enter a city name above to see its current weather
+                    and forecast information.
+                </p>
+            </div>
+        {% endif %}
+
+    {% endif %}
+
+    <!-- Footer -->
+
+    <footer>
+        <p>Weather data provided by Open-Meteo API</p>
+        <p style="margin-top: 8px;">My Weather Website | Django Project</p>
+    </footer>
+
+</div>
+
+</body>
+</html>
+```
